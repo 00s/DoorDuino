@@ -15,11 +15,11 @@ DoorDuino 1.0
 
 ##### This project includes some external libraries for manipulating the RFID-Shield
 
+###### NDEF Library for Arduino
+available at: https://github.com/don/NDEF
+
 - SPI.h
 - PN532_SPI.h
 - PN532.h
 - NfcAdapter.h
- 
-- PN532_SPI interface(SPI, 10);
-- NfcAdapter nfc = NfcAdapter(interface);
 
