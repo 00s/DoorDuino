@@ -35,42 +35,95 @@
 
 #define SS_PIN 10
 #define RST_PIN 9
+
+#define DOOR 8
+
+#define BLUE 2
+#define RED 3
+#define GREEN 4
+
+
 MFRC522 mfrc522(SS_PIN, RST_PIN);	// Create MFRC522 instance.
 
-String content = "";
-
 void setup() {
-	Serial.begin(9600);	// Initialize serial communications with the PC
-	SPI.begin();			// Init SPI bus
-	mfrc522.PCD_Init();	// Init MFRC522 card
-	Serial.println("Scan PICC to see UID...");
+    Serial.begin(9600);	// Initialize serial communications with the PC
+    SPI.begin();			// Init SPI bus
+    mfrc522.PCD_Init();	// Init MFRC522 card
+    
+    
+    pinMode(DOOR, OUTPUT);
+    // initialize the LED pins:
+    pinMode(BLUE, OUTPUT); 
+    pinMode(GREEN, OUTPUT); 
+    pinMode(RED, OUTPUT);  
+    Serial.println("Scan PICC to see UID...");  
 }
 
 void loop() {
-  String tmp;
-  while(mfrc522.PICC_IsNewCardPresent()){
-    
-    tmp = getUIDString(mfrc522); 
-    Serial.println(tmp.length());
-    if(content != tmp && tmp.length() == 21){ 
-      content == tmp;
-    Serial.println(content);
-    //Serial.println();
-    }else{
-      //authenticate();
+    while(mfrc522.PICC_IsNewCardPresent()){
+
+        if ( ! mfrc522.PICC_ReadCardSerial()) {
+            return;
+        } else {
+            
+            String uid = "Read UID:";
+
+            for (byte i = 0; i < mfrc522.uid.size; i++) {
+              uid = uid+(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
+              uid = uid+ String(mfrc522.uid.uidByte[i], HEX);
+            }
+            Serial.println(uid);
+            delay(50);
+            authenticate();
+        }
+    }
+}
+
+void authenticate(){
+   while (Serial.available() > 0) {
+    int inByte = Serial.read();
+    //Serial.write(" mensagem do servidor: " + inByte);
+     if(inByte == 'a'){
+        digitalWrite(DOOR, HIGH);
+        delay(30);
+        digitalWrite(DOOR, LOW);
+        ledBlink(GREEN);
+        
+    }else if (inByte == 'b'){
+      ledBlink(RED);
+          
+    }else if (inByte == 'c'){
+      digitalWrite(RED, HIGH);
+      digitalWrite(GREEN, HIGH);
+      digitalWrite(BLUE, HIGH);
     }
   }
 }
 
-String getUIDString(MFRC522 mfrc){
-  if ( ! mfrc522.PICC_ReadCardSerial()) {
-    return  "There's no card present"; 
-  } else {
-    String uid = "Read UID:";
-    for (byte i = 0; i < mfrc522.uid.size; i++) {
-        uid = uid+(mfrc.uid.uidByte[i] < 0x10 ? " 0" : " ");
-        uid = uid+ String(mfrc522.uid.uidByte[i], HEX);
-    }
-    return uid;
+///
+///  JUST LED CONTROLLING DOWN HERE
+///
+
+// turn RGB led on and off according to colorPin param
+void ledBlink(int colorPin){
+  ledsLOW();  
+  switch(colorPin){
+     case RED:
+        digitalWrite(RED, HIGH);
+        break;
+     case GREEN:
+        digitalWrite(GREEN, HIGH);    
+        break;
   }
+  delay(1500);
+  ledsLOW();  
+  //default color for this project is turned on.
+  digitalWrite(BLUE, HIGH);
+}
+
+// turn all leds off
+void ledsLOW(){
+  digitalWrite(BLUE, LOW);
+  digitalWrite(RED, LOW);
+  digitalWrite(GREEN, LOW);  
 }
