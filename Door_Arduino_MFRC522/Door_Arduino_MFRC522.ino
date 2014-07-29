@@ -60,18 +60,20 @@ void setup() {
 }
 
 void loop() {
+  authenticate();
     while(mfrc522.PICC_IsNewCardPresent()){
 
         if ( ! mfrc522.PICC_ReadCardSerial()) {
             return;
         } else {
             
-            String uid = "Read UID:";
+            String uid = "<";
 
             for (byte i = 0; i < mfrc522.uid.size; i++) {
               uid = uid+(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
               uid = uid+ String(mfrc522.uid.uidByte[i], HEX);
             }
+            uid += " >";
             Serial.println(uid);
             delay(50);
             authenticate();
