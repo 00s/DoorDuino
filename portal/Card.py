@@ -1,4 +1,4 @@
-class Card:
+class Card: # class not used yet
 
   def __init__(self, uid):
     self.uid = uid
