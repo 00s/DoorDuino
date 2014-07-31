@@ -13,7 +13,7 @@ schema_filename = 'db/portal_schema.sql'
 #   keywords
 #
 MASTER_KEY = '0a 14 68 a1'
-ALLOWED, DENIED, CHECKER, PORT, BAUD_RATE = 'a', 'b', 'c', '/dev/ttyACM1', 9600
+ALLOWED, DENIED, CHECKER, BAUD_RATE = 'a', 'b', 'c', 9600
 #
 #   variables
 #
@@ -70,7 +70,7 @@ def rm_uid(uid):                                # Removes uid from local memory 
 def scan_ports():                               # Gets all ttyACM accessible ports (Linux)
     return glob.glob('/dev/ttyACM*')
 #
-#   Database configuration
+#   database configuration
 #
 db_is_new = not os.path.exists(db_filename).    # Checks if database file is there
 
@@ -95,13 +95,13 @@ with sqlite3.connect(db_filename) as conn:
     else:
         print 'Database exists, assume schema does, too.'
 #
-#   Arduino conection
+#   arduino conection
 #
 print "available ttyACM ports:"
 print scan_ports()
 print '---\n---'
 
-for port in scan_ports():						# Tries to connect on the ports available (it will connect to the last one)					
+for port in scan_ports():                       # Tries to connect on the ports available (it will connect to the last one)					
     try:
         arduino = serial.Serial(port, BAUD_RATE)
         print "conected to port " + port
@@ -117,11 +117,10 @@ print(" Portal ready.\n---")
 #
 #   loop
 #
-while 1:                                      # Main loop
+while 1:                                        # Main loop
     if arduino.inWaiting() > 0:
-        uid = arduino.readline().strip()      # Reads what arduino has written
-        if '<' in uid and '>' in uid :        # Verifies if a UID was readden
-
+        uid = arduino.readline().strip()        # Reads what arduino has written
+        if '<' in uid and '>' in uid :          # Verifies if a UID was readden
             uid = uid[2:-2]                   # Remove < > simbols
 
             if updating_list:
