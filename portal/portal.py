@@ -1,28 +1,35 @@
 #!/usr/bin/python
 
 import serial
-import time
 import glob
-from Card import Card
 import os
 import sqlite3
-
+#
+#  file paths
+#
 db_filename = 'db/portal.db'
 schema_filename = 'db/portal_schema.sql'
-
+#
+#  keywords
+#
 MASTER_KEY = '0a 14 68 a1'
 ALLOWED, DENIED, CHECKER, PORT, BAUD_RATE = 'a', 'b', 'c', '/dev/ttyACM1', 9600
+#
+#  variables
+#
 updating_list = False
 authorized_uids = []
-
-def list_update():                            # ch
+#
+#  functions
+#
+def list_update():                              # Alternates Boolean global variable
     global updating_list
     updating_list = not updating_list
 
 def update_list(uid):
-    if not MASTER_KEY in uid:                # ignores updating if master key is present
-        if uid in authorized_uids:            # check if uid is on the list
-            rm_uid(uid)        # remove it if it's there
+    if not MASTER_KEY in uid:                   # ignores updating if master key is present
+        if uid in authorized_uids:              # check if uid is on the list
+            rm_uid(uid)                         # remove it if it's there
             print(uid + ' removed')
             arduino.write(DENIED)
         elif not MASTER_KEY in uid:
@@ -34,10 +41,7 @@ def update_list(uid):
 
 def load_uids():                                # checks database and loads all uids that are already there
 
-    sql = 'select uid from card'                #
-
-    with open(schema_filename, 'rt') as f:
-        schema = f.read
+    sql = 'select uid from card'                # selects uid column
     conn.row_factory = sqlite3.Row
     conn.text_factory = str
     cursor = conn.cursor()
@@ -64,19 +68,12 @@ def rm_uid(uid):                                # REMOVES UID
     conn.commit()
     authorized_uids.remove(uid)
 
-
-def scan_ports():
+def scan_ports():                               # gets all ttyACM accessible ports (Linux)
     return glob.glob('/dev/ttyACM*')
-
-#
-#   END OF FUNCTIONS
-#
-
 #
 #   DATABASE CONFIG
 #
-
-db_is_new = not os.path.exists(db_filename) # checks if database file is there
+db_is_new = not os.path.exists(db_filename).    # checks if database file is there
 
 with sqlite3.connect(db_filename) as conn:
     if db_is_new:
@@ -98,12 +95,9 @@ with sqlite3.connect(db_filename) as conn:
 
     else:
         print 'Database exists, assume schema does, too.'
-
-
 #
-# Arduino conection
+#  Arduino conection
 #
-
 print "available ttyACM ports:"
 print scan_ports()
 print '---\n---'
@@ -120,8 +114,10 @@ load_uids()                                   # loads already registered uids on
 print '---\n---'
 
 time.sleep(2)                                 # waiting arduino's initialization...
-print("initializing portal\n---")
-
+print(" Portal ready.\n---")
+#
+#  loop
+#
 while 1:                                      # main loop
     if arduino.inWaiting() > 0:
         uid = arduino.readline().strip()      # reads what arduino has written
@@ -137,10 +133,10 @@ while 1:                                      # main loop
                 print("MASTER_KEY mode")
                 list_update()
 
-            elif uid in authorized_uids:     # check if uid is in the list here
-                arduino.write(ALLOWED)       # is there
+            elif uid in authorized_uids:      # check if uid is in the list here
+                arduino.write(ALLOWED)        # is there
                 print("UID " + uid + " allowed")
 
-            else:                            # is not there
+            else:                             # is not there
                 arduino.write(DENIED)
                 print("UID " + uid + " denied")
