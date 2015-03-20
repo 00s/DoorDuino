@@ -23,7 +23,9 @@ Given the problematic and its scope, the system must:
 
 #### Solution
 The first approach will be to build a piece of software able to permit users’ entrances through doors. A RFID-Shield ridden on an Arduino must recognize RFID’s compatible tags, reading its UID and sending the data to a server over serial port. The same piece of software must, then, get a response from the server and authorize or deny the read UID. In positive case, Arduino’s response is a 5V signal boosted by a 12V relay and sent to an electric strike used to control door’s accesses.
-In turn, the Python-coded server must recognize the serial port used by the Arduino, read the UID sent and give a response based on its records. Every successful reading must be recorded containing the tag identification, date, time and the server’s response itself. Python’s choice is based on its simple establishment of serial communication beyond the soft SQLite’s communication applicable (and acceptable) on this project.
+In turn, the server must recognize the serial port used by the Arduino, read the UID sent and give a response based on its records. Every successful reading must be recorded containing the tag identification, date, time and the server’s response itself. 
 Authorizations management can be simply set using a previously registered tag as a Master Key, allowing the system to activate a special mode in which the next read tag can be recorded or discarded.
 An RGB led will be used to enhance user’s experience.
-Considering the Server pre-requisites, the project can be embedded in any Operational System Python-compatible which requires up to 260 MB including peripheral library and SQLite, providing a concise and adaptable solution for low hardware configuration.
+
+##### Server Side
+Considering the Server pre-requisites, the project can be embedded in any Operational System Python-compatible which requires up to 260 MB including peripheral library and SQLite, providing a concise and adaptable solution for low hardware configuration.  Python’s choice is based on its simple establishment of serial communication, and the lightweight SQLite integration.
